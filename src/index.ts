@@ -241,9 +241,176 @@ app.get("/api/doctors/profile", authenticateJWT, restrictTo("doctor"), async (re
   }
 });
 
+// Seed database with 6 initial accredited doctors
+const seedInitialDoctors = async () => {
+  if (!db) return;
+  const initialDoctors = [
+    {
+      _id: "doc_1",
+      userName: "Dr. Anya Sharma",
+      userEmail: "anya.sharma@studycast.com",
+      specialization: "Radiologist",
+      biography: "Dr. Anya Sharma is a highly experienced radiologist specializing in advanced neuroimaging. She leads our medical imaging analysis team with a focus on precision and efficiency.",
+      hospital: "City Hospital Imaging Center",
+      experience: 14,
+      consultationFee: 150,
+      rating: 4.9,
+      reviewsCount: 128,
+      isVerified: true,
+      avatar: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=800&q=80",
+      reports: [
+        "CT Scan - Chest",
+        "MRI - Brain",
+        "MRI - Amanoxesanist",
+        "MRI - Medical Nhrax",
+        "CT Scan - Proolination"
+      ],
+      availability: [{ day: "Monday", slots: ["09:00", "10:30", "14:00", "15:30"] }]
+    },
+    {
+      _id: "doc_2",
+      userName: "Dr. Aria Sharma",
+      userEmail: "aria.sharma@studycast.com",
+      specialization: "Cardiology Radiologist",
+      biography: "Dr. Aria Sharma brings over 15 years of diagnostic imaging experience. Specialist in cardiovascular CT and MRI protocols.",
+      hospital: "Medical Center Diagnostics",
+      experience: 15,
+      consultationFee: 175,
+      rating: 4.8,
+      reviewsCount: 94,
+      isVerified: true,
+      avatar: "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=800&q=80",
+      reports: ["Coronary CT Angiography", "Cardiac MRI", "Echocardiogram Assessment"],
+      availability: [{ day: "Tuesday", slots: ["08:30", "11:00", "13:30"] }]
+    },
+    {
+      _id: "doc_3",
+      userName: "Dr. Amm Sharma",
+      userEmail: "amm.sharma@studycast.com",
+      specialization: "Vascular Radiologist",
+      biography: "Dr. Amm Sharma leads point-of-care ultrasound workflows and vascular diagnostic studies.",
+      hospital: "Regional Care Center",
+      experience: 12,
+      consultationFee: 140,
+      rating: 4.9,
+      reviewsCount: 110,
+      isVerified: true,
+      avatar: "https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&w=800&q=80",
+      reports: ["Vascular Ultrasound", "Abdominal CT Scan", "Soft Tissue Scan"],
+      availability: [{ day: "Wednesday", slots: ["10:00", "14:00", "16:00"] }]
+    },
+    {
+      _id: "doc_4",
+      userName: "Dr. Manta Sharma",
+      userEmail: "manta.sharma@studycast.com",
+      specialization: "Pediatric Radiologist",
+      biography: "Dr. Manta Sharma specializes in pediatric radiology and women's health imaging.",
+      hospital: "University Health Women's Hub",
+      experience: 10,
+      consultationFee: 130,
+      rating: 4.9,
+      reviewsCount: 86,
+      isVerified: true,
+      avatar: "https://images.unsplash.com/photo-1594824813566-888557790613?auto=format&fit=crop&w=800&q=80",
+      reports: ["Pediatric MRI", "Pelvic Ultrasound", "Bone Density Scan"],
+      availability: [{ day: "Thursday", slots: ["09:00", "11:30", "15:00"] }]
+    },
+    {
+      _id: "doc_5",
+      userName: "Dr. Rorah Sharma",
+      userEmail: "rorah.sharma@studycast.com",
+      specialization: "Musculoskeletal Radiologist",
+      biography: "Dr. Rorah Sharma focuses on musculoskeletal imaging and sports injury diagnostics.",
+      hospital: "Metro Imaging Institute",
+      experience: 11,
+      consultationFee: 160,
+      rating: 4.7,
+      reviewsCount: 75,
+      isVerified: true,
+      avatar: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&w=800&q=80",
+      reports: ["Knee MRI", "Spine CT", "Shoulder Arthrogram"],
+      availability: [{ day: "Friday", slots: ["08:00", "10:00", "13:00", "15:00"] }]
+    },
+    {
+      _id: "doc_6",
+      userName: "Dr. Jom Hanan",
+      userEmail: "jom.hanan@studycast.com",
+      specialization: "Emergency & Oncology Radiologist",
+      biography: "Dr. Jom Hanan is a senior radiologist with 20+ years expertise in emergency imaging and oncology.",
+      hospital: "City Hospital Central",
+      experience: 22,
+      consultationFee: 200,
+      rating: 5.0,
+      reviewsCount: 195,
+      isVerified: true,
+      avatar: "https://images.unsplash.com/photo-1582750433449-648ed127bb54?auto=format&fit=crop&w=800&q=80",
+      reports: ["Full Body PET-CT", "Thoracic Scan", "Brain Angiogram"],
+      availability: [{ day: "Saturday", slots: ["09:00", "12:00"] }]
+    }
+  ];
+
+  for (const doc of initialDoctors) {
+    const userId = `user_${doc._id}`;
+    await db.collection("users").updateOne(
+      { _id: userId },
+      {
+        $set: {
+          _id: userId,
+          name: doc.userName,
+          email: doc.userEmail,
+          role: "doctor",
+          image: doc.avatar,
+          updatedAt: new Date()
+        }
+      },
+      { upsert: true }
+    );
+
+    await db.collection("doctors").updateOne(
+      { _id: doc._id },
+      {
+        $set: {
+          _id: doc._id,
+          user: userId,
+          name: doc.userName,
+          specialization: doc.specialization,
+          biography: doc.biography,
+          hospital: doc.hospital,
+          experience: doc.experience,
+          consultationFee: doc.consultationFee,
+          rating: doc.rating,
+          reviewsCount: doc.reviewsCount,
+          isVerified: true,
+          avatar: doc.avatar,
+          reports: doc.reports,
+          availability: doc.availability,
+          updatedAt: new Date()
+        }
+      },
+      { upsert: true }
+    );
+  }
+};
+
+app.all("/api/seed", async (req: Request, res: Response) => {
+  try {
+    await seedInitialDoctors();
+    const doctors = await db.collection("doctors").find({}).toArray();
+    res.json({ message: "Database seeded successfully with doctor records", count: doctors.length });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Get doctors list with search, filter, sorting, and pagination (raw mongo)
 app.get("/api/doctors", async (req: Request, res: Response) => {
   try {
+    // Auto-seed if database is empty
+    const count = await db.collection("doctors").countDocuments();
+    if (count === 0) {
+      await seedInitialDoctors();
+    }
+
     const {
       search,
       specialization,
@@ -312,10 +479,18 @@ app.get("/api/doctors", async (req: Request, res: Response) => {
     // Populate user info for list
     const userIds = doctors.map((d: any) => d.user);
     const users = await db.collection("users").find({ _id: { $in: userIds } }).toArray();
-    const userMap = new Map(users.map((u: any) => [u._id.toString(), { name: u.name, email: u.email }]));
+    const userMap = new Map<string, { name: string; email: string; image?: string }>(
+      users.map((u: any) => [u._id.toString(), { name: u.name, email: u.email, image: u.image }])
+    );
     
     doctors.forEach((d: any) => {
-      d.user = userMap.get(d.user) || { name: "Accredited Doctor", email: "" };
+      const u = userMap.get(d.user?.toString()) || { name: d.name || "Accredited Doctor", email: "", image: d.avatar };
+      d.user = u;
+      d.name = d.name || u.name;
+      d.specialty = d.specialization || d.specialty || "Radiologist";
+      d.avatar = d.avatar || u.image || "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=800&q=80";
+      d.bio = d.biography || d.bio || "Diagnostic radiologist at Studycast Medical Center.";
+      d.reports = d.reports || ["CT Scan - Diagnostic Study", "MRI - High Resolution", "Ultrasound Report"];
     });
 
     const total = await db.collection("doctors").countDocuments(query);
